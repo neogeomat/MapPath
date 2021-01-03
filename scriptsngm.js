@@ -8,12 +8,30 @@
             lng: 22.8
         },
         zoom: 16
-    });;
+    });
+    // L.GeoIP.centerMapOnPosition(map, 15);
     // add the OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
+    routing = new L.Routing.control({
+        waypoints: [
+            L.latLng(37.56569, 22.8),
+            L.latLng(37.56569, 22.7)
+        ],
+        routeWhileDragging: true,
+        show: true
+    });
+    routing.addTo(map);
+    // moving ruting results outside map
+    var routingControlContainer = routing.getContainer();
+    var controlContainerParent = routingControlContainer.parentNode;
+    controlContainerParent.removeChild(routingControlContainer);
+    var itineraryDiv = document.getElementById('path-results');
+    // routingControlContainer.removeAttribute('class', 'leaflet-routing-container');
+    itineraryDiv.appendChild(routingControlContainer);
+
     // FeatureGroup is to store editable layers
     var drawnItems = new L.geoJSON();
     map.addLayer(drawnItems);
@@ -40,6 +58,8 @@
         updateMarkers();
         drawnItems.addLayer(layer);
     });
+
+
     // ngcodeend
 
     function updateMarkers(forceRename) {
