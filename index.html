@@ -90,18 +90,18 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="border p-3 clearfix">
-                                        <div class="input-group input-group-sm mb-2 mr-sm-2">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text" id="inputGroup-sizing-sm">Latitude</span>
+                                        <div class="input-group input-group-sm mb-2 mr-sm-2" id="manual-address">
+                                            <!-- <div class="input-group-prepend">
+                                                <span class="input-group-text" id="inputGroup-sizing-sm">Address</span>
                                             </div>
-                                            <input type="text" class="form-control" id="manual-latitude">
+                                            <div type="text" class="form-control"></div> -->
                                         </div>
-                                        <div class="input-group input-group-sm mb-2 mr-sm-2">
+                                        <!-- <div class="input-group input-group-sm mb-2 mr-sm-2">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text" id="inputGroup-sizing-sm">Longitude</span>
                                             </div>
                                             <input type="text" class="form-control" id="manual-longitude">
-                                        </div>
+                                        </div> -->
                                         <button class="btn btn-outline-primary btn-sm float-right" id="manual-marker">add marker</button>
                                     </div>
                                 </div>
@@ -176,6 +176,10 @@
     <script src="assets/leaflet-geoip.js"></script>
     <link rel="stylesheet" href="assets/leaflet-routing-machine-3.2.12/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.css" />
     <script src="assets/leaflet-routing-machine-3.2.12/leaflet-routing-machine-3.2.12/dist/leaflet-routing-machine.js"></script>
+    <!-- <script src="assets/leaflet-routing-machine-3.2.12/leaflet-routing-machine-3.2.12/examples/Control.Geocoder.js"></script> -->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <!-- <script src="scripts.js"></script> -->
     <script src="scriptsngm.js"></script>
 </body>
