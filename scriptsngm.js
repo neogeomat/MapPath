@@ -169,9 +169,7 @@
         updateMarkers();
         drawnItems.temp.unbindPopup()
         drawnItems.addLayer(drawnItems.temp);
-        // while (geocoderControlContainer.firstchild) {
-        geocoderControlContainer.removeChild(geocoderControlContainer.lastChild);
-        // }
+        geocoder._collapse();
         // debugger;
     };
     // geocoder.options.geocoder.options.
