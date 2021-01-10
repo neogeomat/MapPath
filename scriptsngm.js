@@ -21,17 +21,49 @@
             L.latLng(37.56569, 22.7)
         ],
         routeWhileDragging: true,
-        show: true,
+        show: false,
         // geocoder: L.Control.Geocoder.nominatim()
     });
     routing.addTo(map);
+    routing.on('routesfound', route => {
+        // console.log(route);
+        var itineraryDiv = document.getElementById('path-results');
+        itineraryDiv.innerHTML = `${route.routes[0].name}<div>${route.routes[0].coordinates.toString()}</div>`;
+        // debugger;
+    });
+
+    function createButton(label, container) {
+        var btn = L.DomUtil.create('button', '', container);
+        btn.setAttribute('type', 'button');
+        btn.innerHTML = label;
+        return btn;
+    }
+
+    map.on('click', function(e) {
+        var container = L.DomUtil.create('div'),
+            startBtn = createButton('Start from this location', container),
+            destBtn = createButton('Go to this location', container);
+        L.DomEvent.on(startBtn, 'click', function() {
+            routing.spliceWaypoints(0, 1, e.latlng);
+            map.closePopup();
+        });
+        L.DomEvent.on(destBtn, 'click', function() {
+            routing.spliceWaypoints(routing.getWaypoints().length - 1, 1, e.latlng);
+            map.closePopup();
+        });
+        L.popup()
+            .setContent(container)
+            .setLatLng(e.latlng)
+            .openOn(map);
+    });
+
     // moving ruting results outside map
-    var routingControlContainer = routing.getContainer();
-    var controlContainerParent = routingControlContainer.parentNode;
-    controlContainerParent.removeChild(routingControlContainer);
-    var itineraryDiv = document.getElementById('path-results');
-    routingControlContainer.removeAttribute('class', 'leaflet-routing-container');
-    itineraryDiv.appendChild(routingControlContainer);
+    // var routingControlContainer = routing.getContainer();
+    // var controlContainerParent = routingControlContainer.parentNode;
+    // controlContainerParent.removeChild(routingControlContainer);
+
+    // routingControlContainer.removeAttribute('class', 'leaflet-routing-container');
+    // itineraryDiv.appendChild(routingControlContainer);
 
     // FeatureGroup is to store editable layers
     var drawnItems = new L.geoJSON();
@@ -42,7 +74,7 @@
         },
         draw: {
             polyline: false,
-            // marker: false,
+            marker: true,
             circlemarker: false,
             circle: false,
             polygon: false,
@@ -84,7 +116,7 @@
                 $('<div>', {
                     class: 'list-group-item list-group-item-action d-flex p-0',
                     html: `<span class="float-left p-2 border-right dragger">⇅</span> 
-                        <div class="float-left p-2 mr-auto">Marker #${marker.label} <strong>@</strong><span class="text-muted font-italic" title="${marker.label}"> ${place.name}$</span></div>
+                        <div class="float-left p-2 mr-auto">${place.name}</span></div>
                         <a href="#" class="btn btn-outline-danger btn-sm delete align-self-start mt-1 mr-1">&times;</a>
                       `,
                     data: {
