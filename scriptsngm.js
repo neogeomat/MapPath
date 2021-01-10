@@ -28,7 +28,9 @@
     routing.on('routesfound', route => {
         // console.log(route);
         var itineraryDiv = document.getElementById('path-results');
-        itineraryDiv.innerHTML = `${route.routes[0].name}<div>${route.routes[0].coordinates.toString()}</div>`;
+        var g = L.geoJSON();
+        g.addLayer(L.polyline(route.routes[0].coordinates));
+        itineraryDiv.innerHTML = `${route.routes[0].name}<div>${JSON.stringify(g.toGeoJSON())}</div>`;
         // debugger;
     });
 
