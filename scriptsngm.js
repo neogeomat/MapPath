@@ -182,5 +182,68 @@
     $(".leaflet-control-geocoder-form").removeClass('leaflet-control-geocoder-form');
 
 
-    // nomi = L.Control.Geocoder.nominatim();
-    // nomi.geocode('bhaktapur', response => console.log(response));
+    $('#marker-list').on('click', '.delete', function(e) {
+            e.preventDefault();
+            const markerNode = $(this).closest('.list-group-item'),
+                marker = markerNode.data('marker'),
+                markerIndex = markerNode.index();
+
+            marker.setMap(null);
+            markerNode.remove();
+            markerList.splice(markerIndex, 1);
+            updateMarkers(true);
+            // removeDirections();
+        }).on('mouseenter', '.list-group-item', function(e) {
+            const marker = $(this).data('marker');
+            if (marker) {
+                marker.setAnimation(google.maps.Animation.BOUNCE);
+            }
+        }).on('mouseleave', '.list-group-item', function(e) {
+            const marker = $(this).data('marker');
+            if (marker) {
+                marker.setAnimation(null);
+            }
+        })
+        // initialise sortable markers
+    const sortable = new Sortable.default(document.querySelectorAll('#marker-list'), {
+        draggable: '.list-group-item',
+        appendTo: '#marker-list',
+        handle: '.dragger',
+        classes: {
+            'source:dragging': 'list-group-item-info'
+        }
+    });
+
+    sortable.on('sortable:sorted', (event) => {
+
+        const removed = markerList.splice(event.oldIndex, 1)[0];
+        markerList.splice(event.newIndex, 0, removed)
+    })
+
+    sortable.on('sortable:start', (event) => {
+        const source = $(event.dragEvent.data.originalSource),
+            marker = source.data('marker');
+        console.log(source)
+        setTimeout(function() { marker.setAnimation(google.maps.Animation.BOUNCE); }, 20);
+    })
+    sortable.on('sortable:stop', (event) => {
+        const source = $(event.dragEvent.data.originalSource),
+            marker = source.data('marker');
+
+        setTimeout(function() { marker.setAnimation(null); }, 20);
+
+        markerList.forEach(function(marker, index) {
+            marker.setLabel(index.toString());
+        })
+        setTimeout(function() {
+            updateMarkers();
+            removeDirections();
+        }, 1)
+    })
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+        const currentTab = $(e.target) // newly activated tab
+        drawStyle = drawingStyles[currentTab.data('draw-style')];
+        stopDrawing();
+    });
+    updateMarkers();
