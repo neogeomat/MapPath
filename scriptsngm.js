@@ -96,8 +96,8 @@
         layer = e.layer;
         layer.label = markerList.length.toString();
         markerList.push(layer);
-        updateMarkers();
         drawnItems.addLayer(layer);
+        updateMarkers();
     });
 
 
@@ -127,6 +127,12 @@
                 }).appendTo(uiList);
             });
         })
+        drawnItems.eachLayer(l => {
+            l.latLng = L.latLng(l._latlng);
+            console.log(l._latlng)
+        });
+        debugger;
+        routing.setWaypoints(drawnItems.getLayers());
     }
 
     document.querySelector('#manual-marker').addEventListener('click', function(e) {
@@ -166,9 +172,9 @@
         map.removeLayer(drawnItems.temp);
         markerList.push(drawnItems.temp);
 
-        updateMarkers();
         drawnItems.temp.unbindPopup()
         drawnItems.addLayer(drawnItems.temp);
+        updateMarkers();
         geocoder._collapse();
         // debugger;
     };
