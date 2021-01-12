@@ -39,25 +39,29 @@
         btn.setAttribute('type', 'button');
         btn.innerHTML = label;
         return btn;
-    }
-
-    map.on('click', function(e) {
-        var container = L.DomUtil.create('div'),
-            startBtn = createButton('Start from this location', container),
-            destBtn = createButton('Go to this location', container);
-        L.DomEvent.on(startBtn, 'click', function() {
-            routing.spliceWaypoints(0, 1, e.latlng);
-            map.closePopup();
-        });
-        L.DomEvent.on(destBtn, 'click', function() {
-            routing.spliceWaypoints(routing.getWaypoints().length - 1, 1, e.latlng);
-            map.closePopup();
-        });
-        L.popup()
-            .setContent(container)
-            .setLatLng(e.latlng)
-            .openOn(map);
-    });
+    };
+    // $('body').on('click', function() {
+    //     if (drawnItems.temp) {
+    //         map.removeLayer(drawnItems.temp);
+    //     }
+    // });
+    // map.on('click', function(e) {
+    //     var container = L.DomUtil.create('div'),
+    //         startBtn = createButton('Start from this location', container),
+    //         destBtn = createButton('Go to this location', container);
+    //     L.DomEvent.on(startBtn, 'click', function() {
+    //         routing.spliceWaypoints(0, 1, e.latlng);
+    //         map.closePopup();
+    //     });
+    //     L.DomEvent.on(destBtn, 'click', function() {
+    //         routing.spliceWaypoints(routing.getWaypoints().length - 1, 1, e.latlng);
+    //         map.closePopup();
+    //     });
+    //     L.popup()
+    //         .setContent(container)
+    //         .setLatLng(e.latlng)
+    //         .openOn(map);
+    // });
 
     // moving ruting results outside map
     // var routingControlContainer = routing.getContainer();
@@ -143,9 +147,13 @@
     // });
     var geocoder = L.Control.geocoder({
         collapsed: false,
+        showResultIcons: true,
         defaultMarkGeocode: false
     }).on('markgeocode', function(e) {
         // debugger;
+        if (drawnItems.temp) {
+            map.removeLayer(drawnItems.temp);
+        }
         var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.html + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button>').openPopup();
         drawnItems.temp = m;
         var bbox = e.geocode.bbox;
