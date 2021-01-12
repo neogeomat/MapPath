@@ -62,6 +62,10 @@ body {
     display: none;
 }
 
+#manual-address {
+    height: 30px;
+}
+
 #marker-list:not(:empty)~#get-directions {
     display: inline-block;
 }

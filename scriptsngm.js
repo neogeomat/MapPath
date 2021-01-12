@@ -16,10 +16,10 @@
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
     routing = new L.Routing.control({
-        waypoints: [
-            L.latLng(37.56569, 22.8),
-            L.latLng(37.56569, 22.7)
-        ],
+        // waypoints: [
+        //     L.latLng(37.56569, 22.8),
+        //     L.latLng(37.56569, 22.7)
+        // ],
         routeWhileDragging: true,
         show: false,
         // geocoder: L.Control.Geocoder.nominatim()
@@ -114,7 +114,7 @@
                 marker.setLabel(index.toString());
             }
             $.get(reverseNominatimUrl, { "lat": position.lat, "lon": position.lng }, place => {
-                console.log(place)
+                // console.log(place);
                 $('<div>', {
                     class: 'list-group-item list-group-item-action d-flex p-0',
                     html: `<span class="float-left p-2 border-right dragger">⇅</span> 
@@ -129,27 +129,18 @@
         })
         drawnItems.eachLayer(l => {
             l.latLng = L.latLng(l._latlng);
-            console.log(l._latlng)
+            // console.log(l._latlng);
         });
-        debugger;
-        routing.setWaypoints(drawnItems.getLayers());
+        // debugger;
+        // routing.setWaypoints(drawnItems.getLayers());
+        routing.setWaypoints(markerList);
     }
 
-    document.querySelector('#manual-marker').addEventListener('click', function(e) {
-        e.preventDefault();
-
-        const address = document.querySelector('#manual-address').value;
-        debugger;
-        $.get(NominatimUrl + "search?", {
-                "format": "jsonv2",
-                'q': address
-            },
-            data => {
-                console.log(data);
-                debugger;
-            });
-
-    });;
+    // document.querySelector('#manual-marker').addEventListener('click', function(e) {
+    //     e.preventDefault();
+    //     const address = document.querySelector('#manual-address').value;
+    //     // debugger;
+    // });
     var geocoder = L.Control.geocoder({
         collapsed: false,
         defaultMarkGeocode: false
@@ -202,12 +193,12 @@
         }).on('mouseenter', '.list-group-item', function(e) {
             const marker = $(this).data('marker');
             if (marker) {
-                marker.setAnimation(google.maps.Animation.BOUNCE);
+                // marker.setAnimation(google.maps.Animation.BOUNCE);
             }
         }).on('mouseleave', '.list-group-item', function(e) {
             const marker = $(this).data('marker');
             if (marker) {
-                marker.setAnimation(null);
+                // marker.setAnimation(null);
             }
         })
         // initialise sortable markers
@@ -230,20 +221,20 @@
         const source = $(event.dragEvent.data.originalSource),
             marker = source.data('marker');
         console.log(source)
-        setTimeout(function() { marker.setAnimation(google.maps.Animation.BOUNCE); }, 20);
+            // setTimeout(function() { marker.setAnimation(google.maps.Animation.BOUNCE); }, 20);
     })
     sortable.on('sortable:stop', (event) => {
         const source = $(event.dragEvent.data.originalSource),
             marker = source.data('marker');
 
-        setTimeout(function() { marker.setAnimation(null); }, 20);
+        // setTimeout(function() { marker.setAnimation(null); }, 20);
 
         markerList.forEach(function(marker, index) {
-            marker.setLabel(index.toString());
+            // marker.setLabel(index.toString());
         })
         setTimeout(function() {
             updateMarkers();
-            removeDirections();
+            // removeDirections();
         }, 1)
     })
 
