@@ -9,6 +9,13 @@
         },
         zoom: 16
     });
+    map.locate({ setView: true, maxZoom: 16 });
+
+    function onLocationError(e) {
+        alert(e.message);
+    }
+    map.on('locationerror', onLocationError);
+    L.control.locate().addTo(map);
     // L.GeoIP.centerMapOnPosition(map, 15);
     // add the OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -40,36 +47,6 @@
         btn.innerHTML = label;
         return btn;
     };
-    // $('body').on('click', function() {
-    //     if (drawnItems.temp) {
-    //         map.removeLayer(drawnItems.temp);
-    //     }
-    // });
-    // map.on('click', function(e) {
-    //     var container = L.DomUtil.create('div'),
-    //         startBtn = createButton('Start from this location', container),
-    //         destBtn = createButton('Go to this location', container);
-    //     L.DomEvent.on(startBtn, 'click', function() {
-    //         routing.spliceWaypoints(0, 1, e.latlng);
-    //         map.closePopup();
-    //     });
-    //     L.DomEvent.on(destBtn, 'click', function() {
-    //         routing.spliceWaypoints(routing.getWaypoints().length - 1, 1, e.latlng);
-    //         map.closePopup();
-    //     });
-    //     L.popup()
-    //         .setContent(container)
-    //         .setLatLng(e.latlng)
-    //         .openOn(map);
-    // });
-
-    // moving ruting results outside map
-    // var routingControlContainer = routing.getContainer();
-    // var controlContainerParent = routingControlContainer.parentNode;
-    // controlContainerParent.removeChild(routingControlContainer);
-
-    // routingControlContainer.removeAttribute('class', 'leaflet-routing-container');
-    // itineraryDiv.appendChild(routingControlContainer);
 
     // FeatureGroup is to store editable layers
     var drawnItems = new L.geoJSON();
@@ -88,24 +65,16 @@
         }
     });
     map.addControl(drawControl);
-    // var drawControlContainer = drawControl.getContainer();
-    // var controlContainerParent = drawControlContainer.parentNode;
-    // controlContainerParent.removeChild(drawControlContainer);
-    // var itineraryDiv = document.getElementById('marker-list');
-    // drawControlContainer.removeAttribute('class', 'leaflet-draw-container');
-    // itineraryDiv.appendChild(drawControlContainer);
 
     map.on(L.Draw.Event.CREATED, function(e) {
         var type = e.layerType;
         layer = e.layer;
         layer.label = markerList.length.toString();
+        // debugger;
         markerList.push(layer);
         drawnItems.addLayer(layer);
         updateMarkers();
     });
-
-
-    // ngcodeend
 
     function updateMarkers(forceRename) {
         let uiList = $('#marker-list');
@@ -140,11 +109,6 @@
         routing.setWaypoints(markerList);
     }
 
-    // document.querySelector('#manual-marker').addEventListener('click', function(e) {
-    //     e.preventDefault();
-    //     const address = document.querySelector('#manual-address').value;
-    //     // debugger;
-    // });
     var geocoder = L.Control.geocoder({
         collapsed: false,
         showResultIcons: true,
@@ -155,6 +119,7 @@
             map.removeLayer(drawnItems.temp);
         }
         var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.html + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button>').openPopup();
+
         drawnItems.temp = m;
         var bbox = e.geocode.bbox;
         var poly = L.polygon([
@@ -188,28 +153,29 @@
 
 
     $('#marker-list').on('click', '.delete', function(e) {
-            e.preventDefault();
-            const markerNode = $(this).closest('.list-group-item'),
-                marker = markerNode.data('marker'),
-                markerIndex = markerNode.index();
-
-            marker.setMap(null);
-            markerNode.remove();
-            markerList.splice(markerIndex, 1);
-            updateMarkers(true);
-            // removeDirections();
-        }).on('mouseenter', '.list-group-item', function(e) {
-            const marker = $(this).data('marker');
-            if (marker) {
-                // marker.setAnimation(google.maps.Animation.BOUNCE);
-            }
-        }).on('mouseleave', '.list-group-item', function(e) {
-            const marker = $(this).data('marker');
-            if (marker) {
-                // marker.setAnimation(null);
-            }
-        })
-        // initialise sortable markers
+        e.preventDefault();
+        const markerNode = $(this).closest('.list-group-item'),
+            marker = markerNode.data('marker'),
+            markerIndex = markerNode.index();
+        // debugger;
+        marker.removeFrom(map);
+        // marker.setMap(null);
+        markerNode.remove();
+        markerList.splice(markerIndex, 1);
+        updateMarkers(true);
+        // removeDirections();
+    }).on('mouseenter', '.list-group-item', function(e) {
+        const marker = $(this).data('marker');
+        if (marker) {
+            // marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
+    }).on('mouseleave', '.list-group-item', function(e) {
+        const marker = $(this).data('marker');
+        if (marker) {
+            // marker.setAnimation(null);
+        }
+    });
+    // initialise sortable markers
     const sortable = new Sortable.default(document.querySelectorAll('#marker-list'), {
         draggable: '.list-group-item',
         appendTo: '#marker-list',
@@ -252,3 +218,7 @@
         stopDrawing();
     });
     updateMarkers();
+    L.Marker.setBouncingOptions({
+        bounceHeight: 40,
+        bounceSpeed: 60
+    });
