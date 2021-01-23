@@ -2,13 +2,7 @@
     // ngcodestart
     NominatimUrl = "https://nominatim.openstreetmap.org/";
     reverseNominatimUrl = "https://nominatim.openstreetmap.org/reverse?format=jsonv2";
-    map = L.map("map", {
-        center: {
-            lat: 37.56569,
-            lng: 22.8
-        },
-        zoom: 16
-    });
+    map = L.map("map", {});
     map.locate({ setView: true, maxZoom: 16 });
 
     function onLocationError(e) {
@@ -16,20 +10,15 @@
     }
     map.on('locationerror', onLocationError);
     L.control.locate().addTo(map);
-    // L.GeoIP.centerMapOnPosition(map, 15);
+
     // add the OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
     routing = new L.Routing.control({
-        // waypoints: [
-        //     L.latLng(37.56569, 22.8),
-        //     L.latLng(37.56569, 22.7)
-        // ],
         routeWhileDragging: true,
         show: false,
-        // geocoder: L.Control.Geocoder.nominatim()
     });
     routing.addTo(map);
     routing.on('routesfound', route => {
@@ -71,8 +60,14 @@
         layer = e.layer;
         layer.label = markerList.length.toString();
         // debugger;
-        markerList.push(layer);
-        drawnItems.addLayer(layer);
+        geocoder.options.geocoder.reverse(layer.getLatLng(), 18, response => {
+            console.log(response);
+            var m = layer.addTo(map).bindPopup(response[0].html + '<br><button href="#" center = ' + response[0].center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + response[0].center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
+            drawnItems.temp = m;
+        });
+
+        // markerList.push(layer);
+        // drawnItems.addLayer(layer);
         updateMarkers();
     });
 
@@ -84,7 +79,7 @@
             // const position = marker.getPosition();
             const position = marker.getLatLng();
             if (forceRename) {
-                marker.setLabel(index.toString());
+                // marker.setLabel(index.toString());
             }
             $.get(reverseNominatimUrl, { "lat": position.lat, "lon": position.lng }, place => {
                 // console.log(place);
@@ -118,7 +113,7 @@
         if (drawnItems.temp) {
             map.removeLayer(drawnItems.temp);
         }
-        var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.html + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button>').openPopup();
+        var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.html + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + e.geocode.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
 
         drawnItems.temp = m;
         var bbox = e.geocode.bbox;
@@ -141,6 +136,11 @@
         updateMarkers();
         geocoder._collapse();
         // debugger;
+    };
+
+    function cancelAddressMarker() {
+        drawnItems.m = "";
+        map.removeLayer(drawnItems.temp);
     };
     // geocoder.options.geocoder.options.
     var geocoderControlContainer = geocoder.getContainer();
