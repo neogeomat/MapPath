@@ -4,6 +4,9 @@
     reverseNominatimUrl = "https://nominatim.openstreetmap.org/reverse?format=jsonv2";
     map = L.map("map", {});
     map.locate({ setView: true, maxZoom: 16 });
+    // L.easyButton('<span class="star">&starf;</span>', function() {
+    //     alert('Add Marker \&starf;');
+    // }, 'Add Marker').addTo(map);
 
     function onLocationError(e) {
         alert(e.message);
@@ -17,32 +20,58 @@
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
     routing = new L.Routing.control({
-        routeWhileDragging: true,
+        // routeWhileDragging: true,
         show: false,
+        waypoints: [null],
+        // autoRoute: false
     });
+    // routing.onAdd(function(map) { this.setWaypoints(null) });
     routing.addTo(map);
-    routing.on('routesfound', route => {
-        // console.log(route);
-        var itineraryDiv = document.getElementById('path-results');
-        var g = L.geoJSON();
-        g.addLayer(L.polyline(route.routes[0].coordinates));
-        itineraryDiv.innerHTML = `${route.routes[0].name}<div>${JSON.stringify(g.toGeoJSON())}</div>`;
-        // debugger;
-    });
+
 
     function createButton(label, container) {
         var btn = L.DomUtil.create('button', '', container);
         btn.setAttribute('type', 'button');
         btn.innerHTML = label;
         return btn;
-    };
+    }
+    routing._plan.on('waypointschanged', function(e) {
+        if (routing.getWaypoints().length > markerList.length) {
+            let newWaypoints = routing.getWaypoints().filter((w, index) => !w._latlng);
 
+            let layer = newWaypoints[0];
+
+            if (layer.latLng) {
+                let newIndex = routing.getWaypoints().indexOf(layer);
+                layer.label = markerList.length.toString();
+                // debugger;
+                geocoder.options.geocoder.reverse(layer.latLng, 18, response => {
+                    // console.log(response[0]);
+                    let result;
+                    if (response[0]) {
+                        result = response[0];
+                    } else {
+                        result = {
+                            html: "No response",
+                            center: layer.getLatLng()
+                        }
+                    }
+                    var m = L.marker(layer.latLng).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker(' + newIndex + ')> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker(' + newIndex + ')> Cancel </button>').openPopup();
+                    m.html = result.html;
+                    m.latLng = L.latLng(m._latlng);
+                    drawnItems.temp = m;
+                });
+                updateMarkers();
+            }
+        }
+    });
     // FeatureGroup is to store editable layers
     var drawnItems = new L.geoJSON();
     map.addLayer(drawnItems);
     var drawControl = new L.Control.Draw({
         edit: {
-            featureGroup: drawnItems
+            featureGroup: drawnItems,
+            // edit: false
         },
         draw: {
             polyline: false,
@@ -57,12 +86,23 @@
 
     map.on(L.Draw.Event.CREATED, function(e) {
         var type = e.layerType;
-        layer = e.layer;
+        let layer = e.layer;
         layer.label = markerList.length.toString();
         // debugger;
         geocoder.options.geocoder.reverse(layer.getLatLng(), 18, response => {
-            console.log(response);
-            var m = layer.addTo(map).bindPopup(response[0].html + '<br><button href="#" center = ' + response[0].center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + response[0].center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
+            // console.log(response[0]);
+            let result;
+            if (response[0]) {
+                result = response[0];
+            } else {
+                result = {
+                    html: "No response",
+                    center: layer.getLatLng()
+                }
+            }
+            // debugger;
+            var m = layer.addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
+            m.html = result.html;
             drawnItems.temp = m;
         });
 
@@ -81,27 +121,19 @@
             if (forceRename) {
                 // marker.setLabel(index.toString());
             }
-            $.get(reverseNominatimUrl, { "lat": position.lat, "lon": position.lng }, place => {
-                // console.log(place);
-                $('<div>', {
-                    class: 'list-group-item list-group-item-action d-flex p-0',
-                    html: `<span class="float-left p-2 border-right dragger">⇅</span> 
-                        <div class="float-left p-2 mr-auto">${place.name}</span></div>
+
+            $('<div>', {
+                class: 'list-group-item list-group-item-action d-flex p-0',
+                html: `<span class="float-left p-2 border-right dragger">⇅</span> 
+                        <div class="float-left p-2 mr-auto">${marker.html}</span></div>
                         <a href="#" class="btn btn-outline-danger btn-sm delete align-self-start mt-1 mr-1">&times;</a>
                       `,
-                    data: {
-                        marker: marker
-                    }
-                }).appendTo(uiList);
-            });
+                data: {
+                    marker: marker
+                }
+            }).appendTo(uiList);
+
         })
-        drawnItems.eachLayer(l => {
-            l.latLng = L.latLng(l._latlng);
-            // console.log(l._latlng);
-        });
-        // debugger;
-        // routing.setWaypoints(drawnItems.getLayers());
-        routing.setWaypoints(markerList);
     }
 
     var geocoder = L.Control.geocoder({
@@ -127,19 +159,35 @@
         map.fitBounds(poly.getBounds());
     }).addTo(map);
 
-    function addAddressMarker() {
+    function addAddressMarker(index) {
         map.removeLayer(drawnItems.temp);
-        markerList.push(drawnItems.temp);
-
+        if (!index) {
+            index = markerList.length;
+        }
+        // markerList.push(drawnItems.temp);
+        // debugger;
         drawnItems.temp.unbindPopup()
         drawnItems.addLayer(drawnItems.temp);
-        updateMarkers();
+
         geocoder._collapse();
-        // debugger;
+        drawnItems.eachLayer(l => {
+            l.latLng = L.latLng(l._latlng);
+            // console.log(l._latlng);
+        });
+
+        // routing.spliceWaypoints(index, 0, drawnItems.temp);
+        markerList.splice(index, 0, drawnItems.temp);
+        if (markerList.length == 2) {
+            routing.setWaypoints(markerList);
+            routing.route();
+            map.removeLayer(drawnItems);
+        }
+        updateMarkers();
     };
 
-    function cancelAddressMarker() {
+    function cancelAddressMarker(index) {
         drawnItems.m = "";
+        routing.spliceWaypoints(index, 1);
         map.removeLayer(drawnItems.temp);
     };
     // geocoder.options.geocoder.options.
@@ -161,8 +209,10 @@
         marker.removeFrom(map);
         // marker.setMap(null);
         markerNode.remove();
+        routing.spliceWaypoints(markerIndex, 1); // this must be before splicing from markerlist
         markerList.splice(markerIndex, 1);
         updateMarkers(true);
+
         // removeDirections();
     }).on('mouseenter', '.list-group-item', function(e) {
         const marker = $(this).data('marker');
@@ -194,8 +244,8 @@
     sortable.on('sortable:start', (event) => {
         const source = $(event.dragEvent.data.originalSource),
             marker = source.data('marker');
-        console.log(source)
-            // setTimeout(function() { marker.setAnimation(google.maps.Animation.BOUNCE); }, 20);
+        // console.log(source)
+        // setTimeout(function() { marker.setAnimation(google.maps.Animation.BOUNCE); }, 20);
     })
     sortable.on('sortable:stop', (event) => {
         const source = $(event.dragEvent.data.originalSource),
@@ -204,10 +254,11 @@
         // setTimeout(function() { marker.setAnimation(null); }, 20);
 
         markerList.forEach(function(marker, index) {
-            // marker.setLabel(index.toString());
+            marker.label = index.toString();
         })
         setTimeout(function() {
             updateMarkers();
+            routing.setWaypoints(markerList);
             // removeDirections();
         }, 1)
     })
