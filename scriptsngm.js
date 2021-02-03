@@ -1,4 +1,8 @@
     markerList = [];
+    L.Marker.setBouncingOptions({
+        bounceHeight: 40,
+        bounceSpeed: 60
+    });
     // ngcodestart
     NominatimUrl = "https://nominatim.openstreetmap.org/";
     reverseNominatimUrl = "https://nominatim.openstreetmap.org/reverse?format=jsonv2";
@@ -101,7 +105,10 @@
                 }
             }
             // debugger;
-            var m = layer.addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
+            var m = L.marker(layer.getLatLng()).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>').setBouncingOptions({
+                bounceHeight: 40,
+                bounceSpeed: 60
+            }).openPopup();
             m.html = result.html;
             drawnItems.temp = m;
         });
@@ -218,11 +225,13 @@
         const marker = $(this).data('marker');
         if (marker) {
             // marker.setAnimation(google.maps.Animation.BOUNCE);
+            marker.bounce();
         }
     }).on('mouseleave', '.list-group-item', function(e) {
         const marker = $(this).data('marker');
         if (marker) {
             // marker.setAnimation(null);
+            marker.stopBouncing();
         }
     });
     // initialise sortable markers
