@@ -225,13 +225,18 @@
         const marker = $(this).data('marker');
         if (marker) {
             // marker.setAnimation(google.maps.Animation.BOUNCE);
-            marker.bounce();
+            // marker.bounce();
+            cm = L.circleMarker(marker.getLatLng(), { color: 'red' }).addTo(map);
+            // debugger;
         }
     }).on('mouseleave', '.list-group-item', function(e) {
         const marker = $(this).data('marker');
         if (marker) {
             // marker.setAnimation(null);
-            marker.stopBouncing();
+            // marker.stopBouncing();
+            if (map.hasLayer(cm)) {
+                map.removeLayer(cm);
+            }
         }
     });
     // initialise sortable markers
