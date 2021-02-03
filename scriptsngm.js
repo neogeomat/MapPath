@@ -153,7 +153,7 @@
             map.removeLayer(drawnItems.temp);
         }
         var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.html + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + e.geocode.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
-
+        m.html = e.geocode.html;
         drawnItems.temp = m;
         var bbox = e.geocode.bbox;
         var poly = L.polygon([
@@ -182,12 +182,14 @@
             // console.log(l._latlng);
         });
 
-        // routing.spliceWaypoints(index, 0, drawnItems.temp);
+        // 
         markerList.splice(index, 0, drawnItems.temp);
         if (markerList.length == 2) {
             routing.setWaypoints(markerList);
             routing.route();
             map.removeLayer(drawnItems);
+        } else {
+            routing.spliceWaypoints(index, 0, drawnItems.temp);
         }
         updateMarkers();
     };
@@ -227,6 +229,7 @@
             // marker.setAnimation(google.maps.Animation.BOUNCE);
             // marker.bounce();
             cm = L.circleMarker(marker.getLatLng(), { color: 'red' }).addTo(map);
+            map.panTo(cm.getLatLng());
             // debugger;
         }
     }).on('mouseleave', '.list-group-item', function(e) {
