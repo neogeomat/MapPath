@@ -6,11 +6,16 @@
     // ngcodestart
     NominatimUrl = "https://nominatim.openstreetmap.org/";
     reverseNominatimUrl = "https://nominatim.openstreetmap.org/reverse?format=jsonv2";
-    map = L.map("map", {});
+    map = L.map("map", {
+        closePopupOnClick: true
+    });
     map.locate({ setView: true, maxZoom: 16 });
-    // L.easyButton('<span class="star">&starf;</span>', function() {
-    //     alert('Add Marker \&starf;');
-    // }, 'Add Marker').addTo(map);
+    map.on('click', e => {
+        if (typeof(drawnItems.temp) != 'undefined') {
+            // console.log(e);
+            map.removeLayer(drawnItems.temp);
+        }
+    });
 
     function onLocationError(e) {
         alert(e.message);
@@ -105,7 +110,9 @@
                 }
             }
             // debugger;
-            var m = L.marker(layer.getLatLng()).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>').setBouncingOptions({
+            var m = L.marker(layer.getLatLng(), {
+                closeOnClick: false
+            }).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>').setBouncingOptions({
                 bounceHeight: 40,
                 bounceSpeed: 60
             }).openPopup();
@@ -220,6 +227,13 @@
         markerNode.remove();
         routing.spliceWaypoints(markerIndex, 1); // this must be before splicing from markerlist
         markerList.splice(markerIndex, 1);
+        if (marker) {
+            // marker.setAnimation(null);
+            // marker.stopBouncing();
+            if (map.hasLayer(cm)) {
+                map.removeLayer(cm);
+            }
+        }
         updateMarkers(true);
 
         // removeDirections();
