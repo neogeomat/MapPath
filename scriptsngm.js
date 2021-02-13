@@ -80,7 +80,7 @@
     var drawControl = new L.Control.Draw({
         edit: {
             featureGroup: drawnItems,
-            // edit: false
+            edit: false
         },
         draw: {
             polyline: false,
