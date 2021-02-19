@@ -45,6 +45,29 @@
         return btn;
     }
     routing._plan.on('waypointschanged', function(e) {
+        let changedWaypointIndex = e.waypoints.findIndex((m, index) => (m._latlng != m.latLng));
+        if (changedWaypointIndex >= 0) {
+            let layer = routing.getWaypoints()[changedWaypointIndex];
+            layer._latlng = layer.latLng;
+            if (layer.latLng) {
+                layer.label = changedWaypointIndex;
+                geocoder.options.geocoder.reverse(layer.latLng, 18, response => {
+                    // console.log(response[0]);
+                    let result;
+                    if (response[0]) {
+                        result = response[0];
+                    } else {
+                        result = {
+                            html: "No response",
+                            center: layer.getLatLng()
+                        }
+                    }
+                    layer.html = result.html;
+                });
+            }
+            updateMarkers();
+            // debugger;
+        }
         if (routing.getWaypoints().length > markerList.length) {
             let newWaypoints = routing.getWaypoints().filter((w, index) => !w._latlng);
 
@@ -184,10 +207,12 @@
         drawnItems.addLayer(drawnItems.temp);
 
         geocoder._collapse();
-        drawnItems.eachLayer(l => {
-            l.latLng = L.latLng(l._latlng);
-            // console.log(l._latlng);
-        });
+        // debugger;
+        drawnItems.getLayers()[index].latLng = drawnItems.getLayers()[index]._latlng;
+        // drawnItems.eachLayer(l => {
+        //     l.latLng = L.latLng(l._latlng); // this is putting marker in old position, to be fixed with index
+        //     // console.log(l._latlng);
+        // });
 
         // 
         markerList.splice(index, 0, drawnItems.temp);
@@ -300,7 +325,7 @@
         stopDrawing();
     });
     updateMarkers();
-    L.Marker.setBouncingOptions({
-        bounceHeight: 40,
-        bounceSpeed: 60
-    });
+    // L.Marker.setBouncingOptions({
+    //     bounceHeight: 40,
+    //     bounceSpeed: 60
+    // });
