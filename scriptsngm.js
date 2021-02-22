@@ -135,10 +135,7 @@
             // debugger;
             var m = L.marker(layer.getLatLng(), {
                 closeOnClick: false
-            }).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>').setBouncingOptions({
-                bounceHeight: 40,
-                bounceSpeed: 60
-            }).openPopup();
+            }).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
             m.html = result.html;
             drawnItems.temp = m;
         });
@@ -262,8 +259,13 @@
         updateMarkers(true);
 
         // removeDirections();
-    }).on('mouseenter', '.list-group-item', function(e) {
-        const marker = $(this).data('marker');
+    }).on('mouseenter', '.delete', function(e) {
+        e.preventDefault();
+        // debugger;
+        const markerNode = $(this).closest('.list-group-item'),
+            marker = markerNode.data('marker'),
+            markerIndex = markerNode.index();
+
         if (marker) {
             // marker.setAnimation(google.maps.Animation.BOUNCE);
             // marker.bounce();
@@ -271,8 +273,12 @@
             map.panTo(cm.getLatLng());
             // debugger;
         }
-    }).on('mouseleave', '.list-group-item', function(e) {
-        const marker = $(this).data('marker');
+    }).on('mouseleave', '.delete', function(e) {
+        e.preventDefault();
+        const markerNode = $(this).closest('.list-group-item'),
+            marker = markerNode.data('marker'),
+            markerIndex = markerNode.index();
+
         if (marker) {
             // marker.setAnimation(null);
             // marker.stopBouncing();
