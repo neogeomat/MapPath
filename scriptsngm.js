@@ -33,7 +33,7 @@
         show: false,
         waypoints: [null],
         // autoRoute: false
-    });
+    }).on('routingerror', function(e) { alert(e) });
     // routing.onAdd(function(map) { this.setWaypoints(null) });
     routing.addTo(map);
 
@@ -45,32 +45,37 @@
         return btn;
     }
     routing._plan.on('waypointschanged', function(e) {
-        let changedWaypointIndex = e.waypoints.findIndex((m, index) => (m._latlng != m.latLng));
-        if (changedWaypointIndex >= 0) {
-            let layer = routing.getWaypoints()[changedWaypointIndex];
-            layer._latlng = layer.latLng;
-            if (layer.latLng) {
-                layer.label = changedWaypointIndex;
-                geocoder.options.geocoder.reverse(layer.latLng, 18, response => {
-                    // console.log(response[0]);
-                    let result;
-                    if (response[0]) {
-                        result = response[0];
-                    } else {
-                        result = {
-                            html: "No response",
-                            center: layer.getLatLng()
+        if (routing.getWaypoints().length == markerList.length) {
+            let changedWaypointIndex = e.waypoints.findIndex((m, index) => (m._latlng != m.latLng));
+            // let changedWaypointIndex = e.waypoints.findIndex((m, index) => (!m._latlng));
+            if (changedWaypointIndex >= 0) {
+                let layer = routing.getWaypoints()[changedWaypointIndex];
+                layer = L.marker(layer.latLng);
+                layer.latLng = layer._latlng;
+                if (layer.latLng) {
+                    layer.label = changedWaypointIndex;
+                    geocoder.options.geocoder.reverse(layer.latLng, 18, response => {
+                        console.log(response[0]);
+                        let result;
+                        if (response[0]) {
+                            result = response[0];
+                        } else {
+                            result = {
+                                html: "No response",
+                                center: layer.getLatLng()
+                            }
                         }
-                    }
-                    layer.html = result.html;
-                });
-            }
-            updateMarkers();
-            // debugger;
-        }
-        if (routing.getWaypoints().length > markerList.length) {
-            let newWaypoints = routing.getWaypoints().filter((w, index) => !w._latlng);
+                        layer.html = result.html;
+                        markerList[changedWaypointIndex] = layer;
+                        routing.spliceWaypoints(changedWaypointIndex, 1, layer);
+                        updateMarkers();
+                    });
+                }
 
+                // debugger;
+            }
+        } else if (routing.getWaypoints().length > markerList.length) {
+            let newWaypoints = routing.getWaypoints().filter((w, index) => !w._latlng);
             let layer = newWaypoints[0];
 
             if (layer.latLng) {
@@ -88,7 +93,7 @@
                             center: layer.getLatLng()
                         }
                     }
-                    var m = L.marker(layer.latLng).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker(' + newIndex + ')> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker(' + newIndex + ')> Cancel </button>').openPopup();
+                    var m = L.marker(layer.latLng).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker(["routeDrag",' + newIndex + '])> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker(' + newIndex + ')> Cancel </button>').openPopup();
                     m.html = result.html;
                     m.latLng = L.latLng(m._latlng);
                     drawnItems.temp = m;
@@ -197,29 +202,29 @@
         map.removeLayer(drawnItems.temp);
         if (!index) {
             index = markerList.length;
+        } else if (index[0] == 'routeDrag') {
+            markerList.splice(index[1], 0, drawnItems.temp);
+            routing.getPlan().getWaypoints()[index[1]] = drawnItems.temp;
+            // debugger;
         }
-        // markerList.push(drawnItems.temp);
-        // debugger;
-        drawnItems.temp.unbindPopup()
-        drawnItems.addLayer(drawnItems.temp);
+        if (typeof(index) == 'number') {
+            drawnItems.temp.unbindPopup()
+            drawnItems.addLayer(drawnItems.temp);
 
-        geocoder._collapse();
-        // debugger;
-        drawnItems.getLayers()[index].latLng = drawnItems.getLayers()[index]._latlng;
-        // drawnItems.eachLayer(l => {
-        //     l.latLng = L.latLng(l._latlng); // this is putting marker in old position, to be fixed with index
-        //     // console.log(l._latlng);
-        // });
+            geocoder._collapse();
+            // debugger;
+            drawnItems.getLayers()[index].latLng = drawnItems.temp._latlng;
 
-        // 
-        markerList.splice(index, 0, drawnItems.temp);
-        if (markerList.length == 2) {
-            routing.setWaypoints(markerList);
-            routing.route();
-            map.removeLayer(drawnItems);
-        } else {
-            routing.spliceWaypoints(index, 0, drawnItems.temp);
+            markerList.splice(index, 0, drawnItems.temp);
+            if (markerList.length == 2) {
+                routing.setWaypoints(markerList);
+                routing.route();
+                map.removeLayer(drawnItems);
+            } else {
+                routing.spliceWaypoints(index, 0, drawnItems.temp);
+            }
         }
+
         updateMarkers();
     };
 
