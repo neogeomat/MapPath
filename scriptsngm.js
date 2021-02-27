@@ -184,8 +184,8 @@
         if (drawnItems.temp) {
             map.removeLayer(drawnItems.temp);
         }
-        var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.html + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + e.geocode.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
-        m.html = e.geocode.html;
+        var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.name + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + e.geocode.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
+        m.html = e.geocode.name;
         drawnItems.temp = m;
         var bbox = e.geocode.bbox;
         var poly = L.polygon([
@@ -213,7 +213,8 @@
 
             geocoder._collapse();
             // debugger;
-            drawnItems.getLayers()[index].latLng = drawnItems.temp._latlng;
+            // drawnItems.getLayers()[index].latLng = drawnItems.temp._latlng;
+            drawnItems.temp.latLng = drawnItems.temp._latlng;
 
             markerList.splice(index, 0, drawnItems.temp);
             if (markerList.length == 2) {
@@ -336,7 +337,3 @@
         stopDrawing();
     });
     updateMarkers();
-    // L.Marker.setBouncingOptions({
-    //     bounceHeight: 40,
-    //     bounceSpeed: 60
-    // });
