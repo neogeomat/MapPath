@@ -36,7 +36,14 @@
     }).on('routingerror', function(e) { alert(e) });
     // routing.onAdd(function(map) { this.setWaypoints(null) });
     routing.addTo(map);
-
+    routing.on('routesfound', route => {
+        // console.log(route);
+        var itineraryDiv = document.getElementById('path-results');
+        var g = L.geoJSON();
+        g.addLayer(L.polyline(route.routes[0].coordinates));
+        itineraryDiv.innerHTML = `${route.routes[0].name}<div>${JSON.stringify(g.toGeoJSON())}</div>`;
+        // debugger;
+    });
 
     function createButton(label, container) {
         var btn = L.DomUtil.create('button', '', container);
