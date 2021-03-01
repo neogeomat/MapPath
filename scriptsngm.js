@@ -35,18 +35,18 @@
         fitSelectedRoutes: false,
         // autoRoute: false
     }).on('routingstart', function(e) {
-        map.spin(true);
+        // map.spin(true);
     }).on('routingerror', function(e) {
         alert(e.message);
-        map.spin(false);
+        // map.spin(false);
     });
     // routing.onAdd(function(map) { this.setWaypoints(null) });
     routing.addTo(map);
     routing.on('routesfound', route => {
         // console.log(route);
-        map.spin(false);
+        // map.spin(false);
         // map._spinner.stop();
-        setTimeout(function() { map.spin(false); }, 1000);
+        // setTimeout(function() { map.spin(false); }, 1000);
         var itineraryDiv = document.getElementById('path-results');
         var g = L.geoJSON();
         g.addLayer(L.polyline(route.routes[0].coordinates));
