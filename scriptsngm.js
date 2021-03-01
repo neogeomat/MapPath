@@ -28,20 +28,30 @@
         maxZoom: 19,
         attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
     }).addTo(map);
-    routing = new L.Routing.control({
+    let routing = new L.Routing.control({
         // routeWhileDragging: true,
         show: false,
         waypoints: [null],
+        fitSelectedRoutes: false,
         // autoRoute: false
-    }).on('routingerror', function(e) { alert(e.message) });
+    }).on('routingstart', function(e) {
+        map.spin(true);
+    }).on('routingerror', function(e) {
+        alert(e.message);
+        map.spin(false);
+    });
     // routing.onAdd(function(map) { this.setWaypoints(null) });
     routing.addTo(map);
     routing.on('routesfound', route => {
         // console.log(route);
+        map.spin(false);
+        // map._spinner.stop();
+        setTimeout(function() { map.spin(false); }, 3000);
         var itineraryDiv = document.getElementById('path-results');
         var g = L.geoJSON();
         g.addLayer(L.polyline(route.routes[0].coordinates));
         itineraryDiv.innerHTML = `${route.routes[0].name}<div>${JSON.stringify(g.toGeoJSON())}</div>`;
+
         // debugger;
     });
 
@@ -239,6 +249,11 @@
 
     function cancelAddressMarker(index) {
         drawnItems.m = "";
+        if (!index) {
+            index = routing.getWaypoints().length;
+        } else if (index[0] == 'routeDrag') {
+            index = routing.getWaypoints().length;
+        }
         routing.spliceWaypoints(index, 1);
         map.removeLayer(drawnItems.temp);
     };
