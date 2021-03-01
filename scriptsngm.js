@@ -46,7 +46,7 @@
         // console.log(route);
         map.spin(false);
         // map._spinner.stop();
-        setTimeout(function() { map.spin(false); }, 3000);
+        setTimeout(function() { map.spin(false); }, 1000);
         var itineraryDiv = document.getElementById('path-results');
         var g = L.geoJSON();
         g.addLayer(L.polyline(route.routes[0].coordinates));
@@ -110,7 +110,7 @@
                             center: layer.getLatLng()
                         }
                     }
-                    var m = L.marker(layer.latLng).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker(["routeDrag",' + newIndex + '])> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker(' + newIndex + ')> Cancel </button>').openPopup();
+                    var m = L.marker(layer.latLng).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker(["routeDrag",' + newIndex + '])> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker(' + newIndex + ')> Cancel </button>', { closeButton: false }).openPopup();
                     m.html = result.html;
                     m.latLng = L.latLng(m._latlng);
                     drawnItems.temp = m;
@@ -158,7 +158,7 @@
             // debugger;
             var m = L.marker(layer.getLatLng(), {
                 closeOnClick: false
-            }).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
+            }).addTo(map).bindPopup(result.html + '<br><button href="#" center = ' + result.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + result.center + ' onclick=cancelAddressMarker()> Cancel </button>', { closeButton: false }).openPopup();
             m.html = result.html;
             drawnItems.temp = m;
         });
@@ -202,7 +202,7 @@
         if (drawnItems.temp) {
             map.removeLayer(drawnItems.temp);
         }
-        var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.name + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + e.geocode.center + ' onclick=cancelAddressMarker()> Cancel </button>').openPopup();
+        var m = L.marker(e.geocode.center).addTo(map).bindPopup(e.geocode.name + '<br><button href="#" center = ' + e.geocode.center + ' onclick=addAddressMarker()> Add marker </button><button href="#" center = ' + e.geocode.center + ' onclick=cancelAddressMarker()> Cancel </button>', { closeButton: false }).openPopup();
         m.html = e.geocode.name;
         drawnItems.temp = m;
         var bbox = e.geocode.bbox;
