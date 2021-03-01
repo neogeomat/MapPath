@@ -33,7 +33,7 @@
         show: false,
         waypoints: [null],
         // autoRoute: false
-    }).on('routingerror', function(e) { alert(e) });
+    }).on('routingerror', function(e) { alert(e.message) });
     // routing.onAdd(function(map) { this.setWaypoints(null) });
     routing.addTo(map);
     routing.on('routesfound', route => {
